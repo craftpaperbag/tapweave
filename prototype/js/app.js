@@ -224,6 +224,7 @@
       const chip = document.createElement('button');
       chip.className = isTheme ? 'chip theme-chip' : 'chip';
       chip.textContent = text;
+      chip.addEventListener('mousedown', (e) => e.preventDefault());
       chip.addEventListener('click', () => onChipTap(text, isTheme));
       suggestionChips.appendChild(chip);
     });
@@ -269,6 +270,9 @@
 
   // --- チップタップ処理 ---
   function onChipTap(text, isTheme) {
+    // キーボードが閉じないよう先にフォーカスを戻す
+    writingArea.focus();
+
     if (isTheme && getPlainText().length === 0) {
       // テーマチップ: 書き出しとして挿入（改行を保持するためinnerHTMLをクリアしてテキストノード追加）
       writingArea.innerHTML = '';
@@ -281,8 +285,8 @@
     // チップを全消し
     clearChips();
 
-    // カーソルを末尾に移動
-    moveCursorToEnd();
+    // カーソルを末尾に移動（フォーカスは既にあるので不要）
+    moveCursorToEnd(false);
     updateCharCount();
   }
 
@@ -291,7 +295,7 @@
     writingArea.appendChild(document.createTextNode(text));
   }
 
-  function moveCursorToEnd() {
+  function moveCursorToEnd(shouldFocus = true) {
     const range = document.createRange();
     const sel = window.getSelection();
     if (writingArea.childNodes.length > 0) {
@@ -303,7 +307,7 @@
     range.collapse(true);
     sel.removeAllRanges();
     sel.addRange(range);
-    writingArea.focus();
+    if (shouldFocus) writingArea.focus();
   }
 
   // --- 設定パネル ---
