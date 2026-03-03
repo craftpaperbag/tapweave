@@ -10,6 +10,7 @@
   // --- DOM要素 ---
   const writingArea = document.getElementById('writing-area');
   const suggestionChips = document.getElementById('suggestion-chips');
+  const suggestionsArea = document.getElementById('suggestions-area');
   const charCount = document.getElementById('char-count');
   const aiStatus = document.getElementById('ai-status');
   const aiTimestamp = document.getElementById('ai-timestamp');
@@ -17,27 +18,29 @@
   const apiKeyInput = document.getElementById('api-key-input');
   const modelSelect = document.getElementById('model-select');
   const suggestionCountSelect = document.getElementById('suggestion-count');
+  const aiBtnPositionSelect = document.getElementById('ai-btn-position');
   const saveSettingsBtn = document.getElementById('save-settings');
   const closeSettingsBtn = document.getElementById('close-settings');
   const settingsBtn = document.getElementById('settings-btn');
   const clearBtn = document.getElementById('clear-btn');
   const copyBtn = document.getElementById('copy-btn');
   const toggleKeyBtn = document.getElementById('toggle-key-visibility');
+  const aiBtn = document.getElementById('ai-btn');
+  const themeToggleBtn = document.getElementById('theme-toggle-btn');
+  const themeToggleIcon = document.getElementById('theme-toggle-icon');
 
   // --- 状態 ---
   let currentAbortController = null;
-  let debounceTimer = null;
-  const DEBOUNCE_MS = 300; // 仮説H1: 300msデバウンス
 
   // --- 初期化 ---
   function init() {
     loadSettings();
+    loadTheme();
+    loadAiBtnPosition();
     setupEventListeners();
 
     if (!GeminiClient.isConfigured()) {
       showSettings();
-    } else {
-      showInitialSuggestions();
     }
 
     updateCharCount();
@@ -47,12 +50,51 @@
     apiKeyInput.value = GeminiClient.getApiKey();
     modelSelect.value = GeminiClient.getModel();
     suggestionCountSelect.value = String(GeminiClient.getSuggestionCount());
+    aiBtnPositionSelect.value = localStorage.getItem('tapweave_ai_btn_position') || 'right';
+  }
+
+  // --- テーマ ---
+  function loadTheme() {
+    const saved = localStorage.getItem('tapweave_theme') || 'dark';
+    applyTheme(saved);
+  }
+
+  function applyTheme(theme) {
+    document.documentElement.dataset.theme = theme;
+    themeToggleIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
+  }
+
+  function toggleTheme() {
+    const current = document.documentElement.dataset.theme || 'dark';
+    const next = current === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('tapweave_theme', next);
+    applyTheme(next);
+  }
+
+  // --- AIボタン位置 ---
+  function loadAiBtnPosition() {
+    const pos = localStorage.getItem('tapweave_ai_btn_position') || 'right';
+    applyAiBtnPosition(pos);
+  }
+
+  function applyAiBtnPosition(pos) {
+    if (pos === 'left') {
+      suggestionsArea.classList.add('ai-btn-left');
+    } else {
+      suggestionsArea.classList.remove('ai-btn-left');
+    }
   }
 
   // --- イベントリスナー ---
   function setupEventListeners() {
-    // 執筆エリアの入力監視
+    // 執筆エリアの入力監視（文字数カウントのみ）
     writingArea.addEventListener('input', onTextInput);
+
+    // AIボタン
+    aiBtn.addEventListener('click', onAiBtnClick);
+
+    // テーマ切替
+    themeToggleBtn.addEventListener('click', toggleTheme);
 
     // 設定パネル
     settingsBtn.addEventListener('click', showSettings);
@@ -96,19 +138,6 @@
   // --- テキスト入力処理 ---
   function onTextInput() {
     updateCharCount();
-
-    // デバウンス（仮説H1）
-    if (debounceTimer) clearTimeout(debounceTimer);
-
-    const text = getPlainText();
-    if (text.length === 0) {
-      showInitialSuggestions();
-      return;
-    }
-
-    debounceTimer = setTimeout(() => {
-      fetchSuggestions(text);
-    }, DEBOUNCE_MS);
   }
 
   function getPlainText() {
@@ -118,6 +147,16 @@
   function updateCharCount() {
     const len = getPlainText().length;
     charCount.textContent = `${len}文字`;
+  }
+
+  // --- AIボタン処理 ---
+  function onAiBtnClick() {
+    const text = getPlainText();
+    if (text.length === 0) {
+      showInitialSuggestions();
+    } else {
+      fetchSuggestions(text);
+    }
   }
 
   // --- AI提案取得 ---
@@ -215,8 +254,9 @@
   // --- チップタップ処理 ---
   function onChipTap(text, isTheme) {
     if (isTheme && getPlainText().length === 0) {
-      // テーマチップ: 書き出しとして挿入
-      writingArea.textContent = text;
+      // テーマチップ: 書き出しとして挿入（改行を保持するためinnerHTMLをクリアしてテキストノード追加）
+      writingArea.innerHTML = '';
+      writingArea.appendChild(document.createTextNode(text));
     } else {
       // 続きチップ: 末尾に追加
       appendText(text);
@@ -225,17 +265,11 @@
     // カーソルを末尾に移動
     moveCursorToEnd();
     updateCharCount();
-
-    // 新しい提案を取得
-    const currentText = getPlainText();
-    if (debounceTimer) clearTimeout(debounceTimer);
-    fetchSuggestions(currentText);
   }
 
   function appendText(text) {
-    // 現在のテキストの末尾に追加
-    const current = getPlainText();
-    writingArea.textContent = current + text;
+    // 改行を保持するため、textContentではなくテキストノードを末尾に追加
+    writingArea.appendChild(document.createTextNode(text));
   }
 
   function moveCursorToEnd() {
@@ -275,12 +309,12 @@
     GeminiClient.setModel(modelSelect.value);
     GeminiClient.setSuggestionCount(parseInt(suggestionCountSelect.value, 10));
 
-    settingsOverlay.classList.add('hidden');
+    // AIボタン位置を保存・適用
+    const btnPos = aiBtnPositionSelect.value;
+    localStorage.setItem('tapweave_ai_btn_position', btnPos);
+    applyAiBtnPosition(btnPos);
 
-    // 空の状態ならテーマ提案を再取得
-    if (getPlainText().length === 0) {
-      showInitialSuggestions();
-    }
+    settingsOverlay.classList.add('hidden');
   }
 
   function toggleKeyVisibility() {
@@ -291,9 +325,8 @@
   // --- ヘッダーアクション ---
   function clearText() {
     if (getPlainText().length === 0) return;
-    writingArea.textContent = '';
+    writingArea.innerHTML = '';
     updateCharCount();
-    showInitialSuggestions();
   }
 
   async function copyText() {

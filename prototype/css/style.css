@@ -3,7 +3,8 @@
    哲学: 疲れた大人に寄り添う、夜の黒子
    ============================================ */
 
-:root {
+:root,
+[data-theme="dark"] {
   /* ダークテーマ（仮説H3: 布団の中での使用を前提） */
   --bg-primary: #0d1117;
   --bg-secondary: #161b22;
@@ -21,6 +22,25 @@
   --danger: #f85149;
   --success: #3fb950;
   --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="light"] {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f6f8fa;
+  --bg-tertiary: #e9ecef;
+  --text-primary: #1f2328;
+  --text-secondary: #656d76;
+  --text-muted: #8b949e;
+  --accent: #7c6ef0;
+  --accent-soft: rgba(124, 110, 240, 0.12);
+  --accent-hover: #6958e0;
+  --border: #d0d7de;
+  --chip-bg: #f0f2f5;
+  --chip-border: #d0d7de;
+  --chip-hover: #e4e8ec;
+  --danger: #cf222e;
+  --success: #1a7f37;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* リセット＆ベース */
@@ -101,6 +121,11 @@ body {
   color: var(--text-primary);
 }
 
+#theme-toggle-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
 /* ============================================
    執筆エリア
    CORE: 思考の邪魔をしない、静かな空間
@@ -167,9 +192,43 @@ body {
   background: var(--bg-secondary);
   padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
   min-height: 80px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.suggestions-area.ai-btn-left {
+  flex-direction: row-reverse;
+}
+
+.ai-btn {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  background: var(--accent-soft);
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ai-btn:hover {
+  background: var(--accent);
+}
+
+.ai-btn:active {
+  transform: scale(0.92);
+  background: var(--accent);
 }
 
 .suggestion-chips {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;

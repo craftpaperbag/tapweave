@@ -35,6 +35,12 @@
         <option value="5">5個</option>
       </select>
 
+      <label for="ai-btn-position">AIボタン位置</label>
+      <select id="ai-btn-position">
+        <option value="right" selected>右</option>
+        <option value="left">左</option>
+      </select>
+
       <div class="settings-actions">
         <button id="save-settings" class="btn-primary">保存して始める</button>
         <button id="close-settings" class="btn-secondary">閉じる</button>
@@ -50,6 +56,9 @@
     <header class="app-header">
       <h1 class="app-title">TapWeave</h1>
       <div class="header-actions">
+        <button id="theme-toggle-btn" class="icon-btn" aria-label="テーマ切替" title="テーマ切替">
+          <span id="theme-toggle-icon">☀️</span>
+        </button>
         <button id="clear-btn" class="icon-btn" aria-label="クリア" title="書き直す">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14"/>
@@ -87,6 +96,7 @@
       <div id="suggestion-chips" class="suggestion-chips">
         <!-- 初期テーマ提案（空白状態用） -->
       </div>
+      <button id="ai-btn" class="ai-btn" aria-label="AI提案を取得" title="AI提案を取得">✨</button>
     </div>
   </div>
 
