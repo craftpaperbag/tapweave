@@ -12,9 +12,9 @@
   --text-primary: #e6edf3;
   --text-secondary: #8b949e;
   --text-muted: #484f58;
-  --accent: #7c6ef0;
-  --accent-soft: rgba(124, 110, 240, 0.15);
-  --accent-hover: #9589f5;
+  --accent: #e8866a;
+  --accent-soft: rgba(232, 134, 106, 0.15);
+  --accent-hover: #f0a08a;
   --border: #30363d;
   --chip-bg: #1c2333;
   --chip-border: #3a4150;
@@ -22,6 +22,13 @@
   --danger: #f85149;
   --success: #3fb950;
   --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  /* カラフルな糸 — TapWeaveの5色 */
+  --thread-1: #e8866a;
+  --thread-2: #e8a84c;
+  --thread-3: #4db8a4;
+  --thread-4: #5b9fd6;
+  --thread-5: #a78bda;
+  --title-gradient: linear-gradient(90deg, #e8866a, #e8a84c, #4db8a4, #5b9fd6, #a78bda);
 }
 
 [data-theme="light"] {
@@ -31,9 +38,9 @@
   --text-primary: #1f2328;
   --text-secondary: #656d76;
   --text-muted: #8b949e;
-  --accent: #7c6ef0;
-  --accent-soft: rgba(124, 110, 240, 0.12);
-  --accent-hover: #6958e0;
+  --accent: #d06a50;
+  --accent-soft: rgba(208, 106, 80, 0.10);
+  --accent-hover: #b85840;
   --border: #d0d7de;
   --chip-bg: #f0f2f5;
   --chip-border: #d0d7de;
@@ -41,6 +48,12 @@
   --danger: #cf222e;
   --success: #1a7f37;
   --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --thread-1: #d06a50;
+  --thread-2: #c8922a;
+  --thread-3: #2e9e8a;
+  --thread-4: #3d7fb8;
+  --thread-5: #8568c0;
+  --title-gradient: linear-gradient(90deg, #d06a50, #c8922a, #2e9e8a, #3d7fb8, #8568c0);
 }
 
 /* リセット＆ベース */
@@ -90,8 +103,11 @@ body {
 .app-title {
   font-size: 1.1rem;
   font-weight: 600;
-  color: var(--accent);
   letter-spacing: 0.02em;
+  background: var(--title-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .header-actions {
@@ -149,7 +165,7 @@ body {
 }
 
 [data-theme="dark"] .theme-switch-track {
-  background: var(--accent);
+  background: var(--title-gradient);
 }
 
 [data-theme="light"] .theme-switch-track {
@@ -227,7 +243,7 @@ body {
 }
 
 #ai-status.thinking {
-  color: var(--accent);
+  color: var(--thread-3);
 }
 
 #ai-status.error {
@@ -338,29 +354,42 @@ body {
   animation: chipFadeIn 0.25s ease-out;
 }
 
-.chip:hover {
-  background: var(--chip-hover);
-  border-color: var(--accent);
-}
+/* チップの糸色（nth-childで5色ローテーション） */
+.chip:nth-child(5n+1) { border-color: var(--thread-1); }
+.chip:nth-child(5n+2) { border-color: var(--thread-2); }
+.chip:nth-child(5n+3) { border-color: var(--thread-3); }
+.chip:nth-child(5n+4) { border-color: var(--thread-4); }
+.chip:nth-child(5n+5) { border-color: var(--thread-5); }
+
+.chip:nth-child(5n+1):hover { background: var(--chip-hover); border-color: var(--thread-1); }
+.chip:nth-child(5n+2):hover { background: var(--chip-hover); border-color: var(--thread-2); }
+.chip:nth-child(5n+3):hover { background: var(--chip-hover); border-color: var(--thread-3); }
+.chip:nth-child(5n+4):hover { background: var(--chip-hover); border-color: var(--thread-4); }
+.chip:nth-child(5n+5):hover { background: var(--chip-hover); border-color: var(--thread-5); }
 
 .chip:active {
   transform: scale(0.96);
-  background: var(--accent-soft);
-  border-color: var(--accent);
 }
 
 /* テーマチップ（空白状態用） */
 .chip.theme-chip {
-  background: var(--accent-soft);
-  border-color: var(--accent);
-  color: var(--accent-hover);
   font-size: 0.9rem;
 }
 
+.chip.theme-chip:nth-child(5n+1) { background: rgba(232,134,106,0.12); color: var(--thread-1); border-color: var(--thread-1); }
+.chip.theme-chip:nth-child(5n+2) { background: rgba(232,168,76,0.12); color: var(--thread-2); border-color: var(--thread-2); }
+.chip.theme-chip:nth-child(5n+3) { background: rgba(77,184,164,0.12); color: var(--thread-3); border-color: var(--thread-3); }
+.chip.theme-chip:nth-child(5n+4) { background: rgba(91,159,214,0.12); color: var(--thread-4); border-color: var(--thread-4); }
+.chip.theme-chip:nth-child(5n+5) { background: rgba(167,139,218,0.12); color: var(--thread-5); border-color: var(--thread-5); }
+
 .chip.theme-chip:active {
-  background: var(--accent);
   color: #fff;
 }
+.chip.theme-chip:nth-child(5n+1):active { background: var(--thread-1); }
+.chip.theme-chip:nth-child(5n+2):active { background: var(--thread-2); }
+.chip.theme-chip:nth-child(5n+3):active { background: var(--thread-3); }
+.chip.theme-chip:nth-child(5n+4):active { background: var(--thread-4); }
+.chip.theme-chip:nth-child(5n+5):active { background: var(--thread-5); }
 
 /* チップのフェードインアニメーション */
 @keyframes chipFadeIn {
@@ -400,12 +429,12 @@ body {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--accent);
   animation: dotPulse 1s ease-in-out infinite;
 }
 
-.chip-loading .dot:nth-child(2) { animation-delay: 0.15s; }
-.chip-loading .dot:nth-child(3) { animation-delay: 0.3s; }
+.chip-loading .dot:nth-child(1) { background: var(--thread-1); }
+.chip-loading .dot:nth-child(2) { background: var(--thread-3); animation-delay: 0.15s; }
+.chip-loading .dot:nth-child(3) { background: var(--thread-5); animation-delay: 0.3s; }
 
 @keyframes dotPulse {
   0%, 100% { opacity: 0.3; transform: scale(0.8); }
