@@ -121,9 +121,61 @@ body {
   color: var(--text-primary);
 }
 
-#theme-toggle-icon {
-  font-size: 1rem;
-  line-height: 1;
+/* テーマ切替スイッチ */
+.theme-switch {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.theme-switch:hover {
+  background: var(--bg-tertiary);
+}
+
+.theme-switch-track {
+  width: 36px;
+  height: 20px;
+  border-radius: 10px;
+  background: var(--text-muted);
+  position: relative;
+  transition: background 0.2s;
+}
+
+[data-theme="dark"] .theme-switch-track {
+  background: var(--accent);
+}
+
+[data-theme="light"] .theme-switch-track {
+  background: var(--border);
+}
+
+.theme-switch-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+[data-theme="dark"] .theme-switch-thumb {
+  transform: translateX(16px);
+}
+
+.theme-switch-label {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  min-width: 3em;
 }
 
 /* ============================================
@@ -226,6 +278,38 @@ body {
   background: var(--accent);
 }
 
+.suggestions-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.clear-chips-btn {
+  width: 44px;
+  height: 28px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.clear-chips-btn:hover {
+  background: var(--border);
+  color: var(--text-primary);
+}
+
+.clear-chips-btn:active {
+  transform: scale(0.92);
+}
+
 .suggestion-chips {
   flex: 1;
   min-width: 0;
@@ -286,6 +370,19 @@ body {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* エラー表示 */
+.chip-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  color: var(--danger);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  text-align: center;
+  word-break: break-word;
 }
 
 /* ローディング表示 */

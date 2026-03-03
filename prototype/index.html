@@ -56,8 +56,11 @@
     <header class="app-header">
       <h1 class="app-title">TapWeave</h1>
       <div class="header-actions">
-        <button id="theme-toggle-btn" class="icon-btn" aria-label="テーマ切替" title="テーマ切替">
-          <span id="theme-toggle-icon">☀️</span>
+        <button id="theme-toggle-btn" class="theme-switch" aria-label="テーマ切替" title="テーマ切替">
+          <span class="theme-switch-track">
+            <span class="theme-switch-thumb"></span>
+          </span>
+          <span class="theme-switch-label" id="theme-switch-label">ダーク</span>
         </button>
         <button id="clear-btn" class="icon-btn" aria-label="クリア" title="書き直す">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -96,7 +99,10 @@
       <div id="suggestion-chips" class="suggestion-chips">
         <!-- 初期テーマ提案（空白状態用） -->
       </div>
-      <button id="ai-btn" class="ai-btn" aria-label="AI提案を取得" title="AI提案を取得">✨</button>
+      <div class="suggestions-actions">
+        <button id="ai-btn" class="ai-btn" aria-label="AI提案を取得" title="AI提案を取得">✨</button>
+        <button id="clear-chips-btn" class="clear-chips-btn" aria-label="提案を消す" title="提案を消す">✕</button>
+      </div>
     </div>
   </div>
 

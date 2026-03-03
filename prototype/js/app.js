@@ -27,7 +27,8 @@
   const toggleKeyBtn = document.getElementById('toggle-key-visibility');
   const aiBtn = document.getElementById('ai-btn');
   const themeToggleBtn = document.getElementById('theme-toggle-btn');
-  const themeToggleIcon = document.getElementById('theme-toggle-icon');
+  const themeSwitchLabel = document.getElementById('theme-switch-label');
+  const clearChipsBtn = document.getElementById('clear-chips-btn');
 
   // --- 状態 ---
   let currentAbortController = null;
@@ -61,7 +62,7 @@
 
   function applyTheme(theme) {
     document.documentElement.dataset.theme = theme;
-    themeToggleIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
+    themeSwitchLabel.textContent = theme === 'dark' ? 'ダーク' : 'ライト';
   }
 
   function toggleTheme() {
@@ -95,6 +96,9 @@
 
     // テーマ切替
     themeToggleBtn.addEventListener('click', toggleTheme);
+
+    // チップクリア
+    clearChipsBtn.addEventListener('click', clearChips);
 
     // 設定パネル
     settingsBtn.addEventListener('click', showSettings);
@@ -181,8 +185,8 @@
     } catch (err) {
       if (err.name === 'AbortError') return; // キャンセルは無視
       console.error('Suggestion fetch error:', err);
-      setAiStatus('error', 'エラー: ' + truncate(err.message, 30));
-      renderFallbackChips();
+      setAiStatus('error', 'エラー');
+      renderErrorInChips(err.message);
     }
   }
 
@@ -242,6 +246,18 @@
     renderSuggestionChips(fallbacks, false);
   }
 
+  function renderErrorInChips(message) {
+    suggestionChips.innerHTML = '';
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'chip-error';
+    errorDiv.textContent = message;
+    suggestionChips.appendChild(errorDiv);
+  }
+
+  function clearChips() {
+    suggestionChips.innerHTML = '';
+  }
+
   function showLoadingChips() {
     suggestionChips.innerHTML = `
       <div class="chip-loading">
@@ -261,6 +277,9 @@
       // 続きチップ: 末尾に追加
       appendText(text);
     }
+
+    // チップを全消し
+    clearChips();
 
     // カーソルを末尾に移動
     moveCursorToEnd();
