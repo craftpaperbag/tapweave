@@ -93,13 +93,15 @@
     // 執筆エリアの入力監視（文字数カウントのみ）
     writingArea.addEventListener('input', onTextInput);
 
-    // AIボタン
+    // AIボタン（キーボードを閉じない）
+    aiBtn.addEventListener('mousedown', (e) => e.preventDefault());
     aiBtn.addEventListener('click', onAiBtnClick);
 
     // テーマ切替
     themeToggleBtn.addEventListener('click', toggleTheme);
 
-    // チップクリア
+    // チップクリア（キーボードを閉じない）
+    clearChipsBtn.addEventListener('mousedown', (e) => e.preventDefault());
     clearChipsBtn.addEventListener('click', clearChips);
 
     // 設定パネル
