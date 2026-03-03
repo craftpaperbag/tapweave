@@ -40,6 +40,8 @@
     loadAiBtnPosition();
     setupEventListeners();
 
+    restoreText();
+
     if (!GeminiClient.isConfigured()) {
       showSettings();
     }
@@ -139,9 +141,22 @@
     window.visualViewport.addEventListener('scroll', onViewportResize);
   }
 
+  // --- テキスト保存・復元 ---
+  function saveText() {
+    localStorage.setItem('tapweave_text', writingArea.innerHTML);
+  }
+
+  function restoreText() {
+    const saved = localStorage.getItem('tapweave_text');
+    if (saved) {
+      writingArea.innerHTML = saved;
+    }
+  }
+
   // --- テキスト入力処理 ---
   function onTextInput() {
     updateCharCount();
+    saveText();
   }
 
   function getPlainText() {
@@ -288,6 +303,7 @@
     // カーソルを末尾に移動（フォーカスは既にあるので不要）
     moveCursorToEnd(false);
     updateCharCount();
+    saveText();
   }
 
   function appendText(text) {
@@ -350,6 +366,7 @@
     if (getPlainText().length === 0) return;
     writingArea.innerHTML = '';
     updateCharCount();
+    localStorage.removeItem('tapweave_text');
   }
 
   async function copyText() {
