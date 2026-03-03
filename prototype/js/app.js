@@ -12,6 +12,7 @@
   const suggestionChips = document.getElementById('suggestion-chips');
   const charCount = document.getElementById('char-count');
   const aiStatus = document.getElementById('ai-status');
+  const aiTimestamp = document.getElementById('ai-timestamp');
   const settingsOverlay = document.getElementById('settings-overlay');
   const apiKeyInput = document.getElementById('api-key-input');
   const modelSelect = document.getElementById('model-select');
@@ -72,6 +73,24 @@
         hideSettings();
       }
     });
+
+    // モバイルキーボード対応: visualViewportでレイアウト調整
+    setupKeyboardHandler();
+  }
+
+  // --- モバイルキーボード対応 ---
+  function setupKeyboardHandler() {
+    if (!window.visualViewport) return;
+
+    const onViewportResize = () => {
+      const vvHeight = window.visualViewport.height;
+      const offsetTop = window.visualViewport.offsetTop;
+      document.documentElement.style.setProperty('--app-height', `${vvHeight}px`);
+      document.getElementById('app').style.transform = `translateY(${offsetTop}px)`;
+    };
+
+    window.visualViewport.addEventListener('resize', onViewportResize);
+    window.visualViewport.addEventListener('scroll', onViewportResize);
   }
 
   // --- テキスト入力処理 ---
@@ -109,6 +128,7 @@
     }
     currentAbortController = new AbortController();
 
+    updateTimestamp();
     setAiStatus('thinking', '考え中...');
     showLoadingChips();
 
@@ -138,6 +158,7 @@
     }
     currentAbortController = new AbortController();
 
+    updateTimestamp();
     setAiStatus('thinking', '準備中...');
     showLoadingChips();
 
@@ -302,6 +323,14 @@
 
   function truncate(str, max) {
     return str.length > max ? str.slice(0, max) + '...' : str;
+  }
+
+  function updateTimestamp() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    const s = String(now.getSeconds()).padStart(2, '0');
+    aiTimestamp.textContent = `${h}:${m}:${s}`;
   }
 
   function showToast(message) {

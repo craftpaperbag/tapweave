@@ -51,8 +51,10 @@ body {
   display: flex;
   flex-direction: column;
   height: 100dvh;
+  height: calc(var(--app-height, 100dvh));
   max-width: 640px;
   margin: 0 auto;
+  transition: height 0.15s ease-out;
 }
 
 /* ヘッダー */
@@ -131,6 +133,16 @@ body {
   font-size: 0.75rem;
   color: var(--text-muted);
   flex-shrink: 0;
+}
+
+.status-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#ai-timestamp {
+  opacity: 0.7;
 }
 
 #ai-status {
