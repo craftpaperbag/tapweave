@@ -22,7 +22,7 @@ const GeminiClient = (() => {
   }
 
   function getModel() {
-    return localStorage.getItem(STORAGE_KEY_MODEL) || 'gemini-2.0-flash';
+    return localStorage.getItem(STORAGE_KEY_MODEL) || 'gemini-2.5-flash';
   }
 
   function setModel(model) {
