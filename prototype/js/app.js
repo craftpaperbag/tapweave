@@ -1,0 +1,321 @@
+/**
+ * TapWeave - アプリケーションメインロジック
+ *
+ * CORE哲学: タップドリブン、先回り執筆、優秀な黒子
+ */
+
+(() => {
+  'use strict';
+
+  // --- DOM要素 ---
+  const writingArea = document.getElementById('writing-area');
+  const suggestionChips = document.getElementById('suggestion-chips');
+  const charCount = document.getElementById('char-count');
+  const aiStatus = document.getElementById('ai-status');
+  const settingsOverlay = document.getElementById('settings-overlay');
+  const apiKeyInput = document.getElementById('api-key-input');
+  const modelSelect = document.getElementById('model-select');
+  const suggestionCountSelect = document.getElementById('suggestion-count');
+  const saveSettingsBtn = document.getElementById('save-settings');
+  const closeSettingsBtn = document.getElementById('close-settings');
+  const settingsBtn = document.getElementById('settings-btn');
+  const clearBtn = document.getElementById('clear-btn');
+  const copyBtn = document.getElementById('copy-btn');
+  const toggleKeyBtn = document.getElementById('toggle-key-visibility');
+
+  // --- 状態 ---
+  let currentAbortController = null;
+  let debounceTimer = null;
+  const DEBOUNCE_MS = 300; // 仮説H1: 300msデバウンス
+
+  // --- 初期化 ---
+  function init() {
+    loadSettings();
+    setupEventListeners();
+
+    if (!GeminiClient.isConfigured()) {
+      showSettings();
+    } else {
+      showInitialSuggestions();
+    }
+
+    updateCharCount();
+  }
+
+  function loadSettings() {
+    apiKeyInput.value = GeminiClient.getApiKey();
+    modelSelect.value = GeminiClient.getModel();
+    suggestionCountSelect.value = String(GeminiClient.getSuggestionCount());
+  }
+
+  // --- イベントリスナー ---
+  function setupEventListeners() {
+    // 執筆エリアの入力監視
+    writingArea.addEventListener('input', onTextInput);
+
+    // 設定パネル
+    settingsBtn.addEventListener('click', showSettings);
+    saveSettingsBtn.addEventListener('click', saveSettings);
+    closeSettingsBtn.addEventListener('click', hideSettings);
+    settingsOverlay.addEventListener('click', (e) => {
+      if (e.target === settingsOverlay) hideSettings();
+    });
+    toggleKeyBtn.addEventListener('click', toggleKeyVisibility);
+
+    // ヘッダーアクション
+    clearBtn.addEventListener('click', clearText);
+    copyBtn.addEventListener('click', copyText);
+
+    // キーボードでEscで設定を閉じる
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !settingsOverlay.classList.contains('hidden')) {
+        hideSettings();
+      }
+    });
+  }
+
+  // --- テキスト入力処理 ---
+  function onTextInput() {
+    updateCharCount();
+
+    // デバウンス（仮説H1）
+    if (debounceTimer) clearTimeout(debounceTimer);
+
+    const text = getPlainText();
+    if (text.length === 0) {
+      showInitialSuggestions();
+      return;
+    }
+
+    debounceTimer = setTimeout(() => {
+      fetchSuggestions(text);
+    }, DEBOUNCE_MS);
+  }
+
+  function getPlainText() {
+    return writingArea.innerText || '';
+  }
+
+  function updateCharCount() {
+    const len = getPlainText().length;
+    charCount.textContent = `${len}文字`;
+  }
+
+  // --- AI提案取得 ---
+  async function fetchSuggestions(text) {
+    // 前のリクエストをキャンセル
+    if (currentAbortController) {
+      currentAbortController.abort();
+    }
+    currentAbortController = new AbortController();
+
+    setAiStatus('thinking', '考え中...');
+    showLoadingChips();
+
+    try {
+      const suggestions = await GeminiClient.getSuggestions(
+        text,
+        currentAbortController.signal
+      );
+      renderSuggestionChips(suggestions, false);
+      setAiStatus('', '');
+    } catch (err) {
+      if (err.name === 'AbortError') return; // キャンセルは無視
+      console.error('Suggestion fetch error:', err);
+      setAiStatus('error', 'エラー: ' + truncate(err.message, 30));
+      renderFallbackChips();
+    }
+  }
+
+  async function showInitialSuggestions() {
+    if (!GeminiClient.isConfigured()) {
+      renderThemeChipsStatic();
+      return;
+    }
+
+    if (currentAbortController) {
+      currentAbortController.abort();
+    }
+    currentAbortController = new AbortController();
+
+    setAiStatus('thinking', '準備中...');
+    showLoadingChips();
+
+    try {
+      const themes = await GeminiClient.getThemeSuggestions(currentAbortController.signal);
+      renderSuggestionChips(themes, true);
+      setAiStatus('', '');
+    } catch (err) {
+      if (err.name === 'AbortError') return;
+      console.error('Theme fetch error:', err);
+      renderThemeChipsStatic();
+      setAiStatus('', '');
+    }
+  }
+
+  // --- チップ描画 ---
+  function renderSuggestionChips(suggestions, isTheme) {
+    suggestionChips.innerHTML = '';
+    suggestions.forEach((text) => {
+      const chip = document.createElement('button');
+      chip.className = isTheme ? 'chip theme-chip' : 'chip';
+      chip.textContent = text;
+      chip.addEventListener('click', () => onChipTap(text, isTheme));
+      suggestionChips.appendChild(chip);
+    });
+  }
+
+  function renderThemeChipsStatic() {
+    // 仮説H6: 静的なフォールバックテーマ
+    const fallbackThemes = [
+      'ふと、窓の外を見て思った。',
+      'もし明日、全てが変わるとしたら',
+      '最近ずっと気になっていること',
+      'あの日のことを、書き残しておこう',
+      '眠れない夜に浮かんだ、ひとつのアイデア'
+    ];
+    renderSuggestionChips(fallbackThemes, true);
+  }
+
+  function renderFallbackChips() {
+    const fallbacks = ['...と思った。', 'それから、', 'でも実は、'];
+    renderSuggestionChips(fallbacks, false);
+  }
+
+  function showLoadingChips() {
+    suggestionChips.innerHTML = `
+      <div class="chip-loading">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>`;
+  }
+
+  // --- チップタップ処理 ---
+  function onChipTap(text, isTheme) {
+    if (isTheme && getPlainText().length === 0) {
+      // テーマチップ: 書き出しとして挿入
+      writingArea.textContent = text;
+    } else {
+      // 続きチップ: 末尾に追加
+      appendText(text);
+    }
+
+    // カーソルを末尾に移動
+    moveCursorToEnd();
+    updateCharCount();
+
+    // 新しい提案を取得
+    const currentText = getPlainText();
+    if (debounceTimer) clearTimeout(debounceTimer);
+    fetchSuggestions(currentText);
+  }
+
+  function appendText(text) {
+    // 現在のテキストの末尾に追加
+    const current = getPlainText();
+    writingArea.textContent = current + text;
+  }
+
+  function moveCursorToEnd() {
+    const range = document.createRange();
+    const sel = window.getSelection();
+    if (writingArea.childNodes.length > 0) {
+      const lastNode = writingArea.childNodes[writingArea.childNodes.length - 1];
+      range.setStartAfter(lastNode);
+    } else {
+      range.setStart(writingArea, 0);
+    }
+    range.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(range);
+    writingArea.focus();
+  }
+
+  // --- 設定パネル ---
+  function showSettings() {
+    loadSettings();
+    settingsOverlay.classList.remove('hidden');
+  }
+
+  function hideSettings() {
+    if (!GeminiClient.isConfigured()) return; // キーがないと閉じられない
+    settingsOverlay.classList.add('hidden');
+  }
+
+  function saveSettings() {
+    const key = apiKeyInput.value.trim();
+    if (!key) {
+      apiKeyInput.focus();
+      return;
+    }
+
+    GeminiClient.setApiKey(key);
+    GeminiClient.setModel(modelSelect.value);
+    GeminiClient.setSuggestionCount(parseInt(suggestionCountSelect.value, 10));
+
+    settingsOverlay.classList.add('hidden');
+
+    // 空の状態ならテーマ提案を再取得
+    if (getPlainText().length === 0) {
+      showInitialSuggestions();
+    }
+  }
+
+  function toggleKeyVisibility() {
+    const isPassword = apiKeyInput.type === 'password';
+    apiKeyInput.type = isPassword ? 'text' : 'password';
+  }
+
+  // --- ヘッダーアクション ---
+  function clearText() {
+    if (getPlainText().length === 0) return;
+    writingArea.textContent = '';
+    updateCharCount();
+    showInitialSuggestions();
+  }
+
+  async function copyText() {
+    const text = getPlainText();
+    if (!text) return;
+
+    try {
+      await navigator.clipboard.writeText(text);
+      showToast('コピーしました');
+    } catch {
+      // フォールバック
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showToast('コピーしました');
+    }
+  }
+
+  // --- ユーティリティ ---
+  function setAiStatus(className, text) {
+    aiStatus.className = className;
+    aiStatus.textContent = text;
+  }
+
+  function truncate(str, max) {
+    return str.length > max ? str.slice(0, max) + '...' : str;
+  }
+
+  function showToast(message) {
+    const existing = document.querySelector('.toast');
+    if (existing) existing.remove();
+
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    setTimeout(() => toast.remove(), 2000);
+  }
+
+  // --- 起動 ---
+  document.addEventListener('DOMContentLoaded', init);
+})();

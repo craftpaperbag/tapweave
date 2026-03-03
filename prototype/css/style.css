@@ -1,0 +1,421 @@
+/* ============================================
+   TapWeave - Prototype Styles
+   哲学: 疲れた大人に寄り添う、夜の黒子
+   ============================================ */
+
+:root {
+  /* ダークテーマ（仮説H3: 布団の中での使用を前提） */
+  --bg-primary: #0d1117;
+  --bg-secondary: #161b22;
+  --bg-tertiary: #21262d;
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --text-muted: #484f58;
+  --accent: #7c6ef0;
+  --accent-soft: rgba(124, 110, 240, 0.15);
+  --accent-hover: #9589f5;
+  --border: #30363d;
+  --chip-bg: #1c2333;
+  --chip-border: #3a4150;
+  --chip-hover: #252d3f;
+  --danger: #f85149;
+  --success: #3fb950;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* リセット＆ベース */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100dvh;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ============================================
+   アプリレイアウト
+   ============================================ */
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+/* ヘッダー */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.app-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.02em;
+}
+
+.header-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  min-width: 40px;
+  min-height: 40px;
+}
+
+.icon-btn:hover,
+.icon-btn:active {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+/* ============================================
+   執筆エリア
+   CORE: 思考の邪魔をしない、静かな空間
+   ============================================ */
+.writing-area {
+  flex: 1;
+  padding: 20px 16px;
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: var(--text-primary);
+  overflow-y: auto;
+  outline: none;
+  -webkit-overflow-scrolling: touch;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.writing-area:empty::before {
+  content: attr(data-placeholder);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+/* ステータスバー */
+.status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 16px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+#ai-status {
+  transition: opacity 0.3s;
+}
+
+#ai-status.thinking {
+  color: var(--accent);
+}
+
+#ai-status.error {
+  color: var(--danger);
+}
+
+/* ============================================
+   AI提案チップエリア
+   CORE: タップドリブン、指先を少し動かすだけ
+   ============================================ */
+.suggestions-area {
+  flex-shrink: 0;
+  border-top: 1px solid var(--border);
+  background: var(--bg-secondary);
+  padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
+  min-height: 80px;
+}
+
+.suggestion-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.chip {
+  background: var(--chip-bg);
+  border: 1px solid var(--chip-border);
+  border-radius: 20px;
+  padding: 10px 18px;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  max-width: 100%;
+  text-align: center;
+  line-height: 1.4;
+  animation: chipFadeIn 0.25s ease-out;
+}
+
+.chip:hover {
+  background: var(--chip-hover);
+  border-color: var(--accent);
+}
+
+.chip:active {
+  transform: scale(0.96);
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+/* テーマチップ（空白状態用） */
+.chip.theme-chip {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent-hover);
+  font-size: 0.9rem;
+}
+
+.chip.theme-chip:active {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* チップのフェードインアニメーション */
+@keyframes chipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ローディング表示 */
+.chip-loading {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+}
+
+.chip-loading .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: dotPulse 1s ease-in-out infinite;
+}
+
+.chip-loading .dot:nth-child(2) { animation-delay: 0.15s; }
+.chip-loading .dot:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes dotPulse {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+/* ============================================
+   設定オーバーレイ
+   ============================================ */
+.settings-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 16px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.settings-overlay.hidden {
+  display: none;
+}
+
+.settings-panel {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px 24px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: var(--shadow);
+}
+
+.settings-panel h2 {
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+  color: var(--text-primary);
+}
+
+.settings-panel label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+  margin-top: 16px;
+}
+
+.settings-panel label:first-of-type {
+  margin-top: 0;
+}
+
+.api-key-row {
+  display: flex;
+  gap: 8px;
+}
+
+.settings-panel input,
+.settings-panel select {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.settings-panel input:focus,
+.settings-panel select:focus {
+  border-color: var(--accent);
+}
+
+.api-key-row input {
+  flex: 1;
+}
+
+.api-key-row .icon-btn {
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.eye-icon {
+  font-size: 1rem;
+}
+
+.settings-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.btn-primary {
+  flex: 1;
+  padding: 12px 16px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn-primary:hover {
+  background: var(--accent-hover);
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-secondary {
+  padding: 12px 16px;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn-secondary:hover {
+  background: var(--border);
+}
+
+.settings-note {
+  margin-top: 16px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* コピー完了トースト */
+.toast {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-tertiary);
+  color: var(--success);
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  border: 1px solid var(--success);
+  animation: toastIn 0.3s ease-out;
+  z-index: 200;
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ============================================
+   スクロールバー（控えめに）
+   ============================================ */
+.writing-area::-webkit-scrollbar {
+  width: 4px;
+}
+
+.writing-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.writing-area::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
